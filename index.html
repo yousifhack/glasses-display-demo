@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Glasses Display Demo</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+    }
+
+    main {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    p { color: #d1d5db; }
+    .label { color: #6ee7b7; font-weight: bold; }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 260px;
+      margin: 16px 0;
+      background: #18202c;
+      border: 2px solid #94a3b8;
+      border-radius: 12px;
+    }
+
+    .telemetry, .controls {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .telemetry span {
+      padding: 10px;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      background: #172033;
+      color: white;
+      border: 2px solid #94a3b8;
+      border-radius: 10px;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:focus {
+      outline: 4px solid #6ee7b7;
+      outline-offset: 3px;
+    }
+
+    #status { min-height: 48px; }
+    footer { color: #cbd5e1; font-size: 14px; }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Yousif Control Center</h1>
+    <div class="label">DISPLAY DEMO · NO DRONE CONNECTED</div>
+
+    <video id="video" muted playsinline loop preload="none"
+           aria-label="Sample flower video">
+      <source
+        src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+        type="video/mp4">
+      Your browser does not support this video.
+    </video>
+
+    <div class="telemetry">
+      <span>Demo battery: 85%</span>
+      <span>Demo altitude: 12 m</span>
+    </div>
+
+    <div class="controls">
+      <button id="play" type="button">Play</button>
+      <button id="restart" type="button">Restart</button>
+    </div>
+
+    <p id="status" role="status" aria-live="polite">
+      Ready. Select Play to load the sample video.
+    </p>
+
+    <footer>
+      Arrow keys: choose a button · Enter: select<br>
+      Sample video from MDN. Telemetry is simulated.
+      No cloud AI or vehicle commands.
+    </footer>
+  </main>
+
+  <script>
+    const video = document.getElementById("video");
+    const play = document.getElementById("play");
+    const restart = document.getElementById("restart");
+    const status = document.getElementById("status");
+    const buttons = [play, restart];
+
+    async function startPlayback() {
+      status.textContent = "Loading sample video…";
+
+      try {
+        await video.play();
+      } catch (error) {
+        status.textContent =
+          "Playback could not start. Check your connection and try Play again.";
+      }
+    }
+
+    play.addEventListener("click", () => {
+      if (video.paused) {
+        startPlayback();
+      } else {
+        video.pause();
+      }
+    });
+
+    restart.addEventListener("click", () => {
+      if (video.readyState > 0) {
+        video.currentTime = 0;
+      }
+      startPlayback();
+    });
+
+    video.addEventListener("playing", () => {
+      play.textContent = "Pause";
+      status.textContent = "Playing sample video.";
+    });
+
+    video.addEventListener("pause", () => {
+      play.textContent = "Play";
+      status.textContent = "Video paused.";
+    });
+
+    video.addEventListener("waiting", () => {
+      status.textContent = "Buffering sample video…";
+    });
+
+    video.addEventListener("error", () => {
+      play.textContent = "Play";
+      status.textContent =
+        "Video could not load. The sample source or format may be unavailable.";
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const directions = {
+        ArrowRight: 1,
+        ArrowDown: 1,
+        ArrowLeft: -1,
+        ArrowUp: -1
+      };
+
+      if (!(event.key in directions)) return;
+
+      event.preventDefault();
+
+      const current = buttons.indexOf(document.activeElement);
+      const next = current < 0
+        ? 0
+        : (current + directions[event.key] + buttons.length)
+          % buttons.length;
+
+      buttons[next].focus();
+    });
+
+    play.focus();
+  </script>
+</body>
+</html>
